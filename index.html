@@ -236,6 +236,28 @@ function getTodayStr() {
   return `${d}.${m}.${y}`;
 }
 
+// Приводит разные форматы даты к ДД.ММ.ГГГГ
+function normaliseDate(raw) {
+  if (!raw) return '';
+  // Уже ДД.ММ.ГГГГ
+  if (/^\d{2}\.\d{2}\.\d{4}$/.test(raw)) return raw;
+  // Date(2026,5,29) — формат Google Sheets gviz (месяц 0-based)
+  const gviz = raw.match(/Date\((\d+),(\d+),(\d+)\)/);
+  if (gviz) {
+    const y = gviz[1];
+    const m = String(parseInt(gviz[2]) + 1).padStart(2, '0');
+    const d = String(gviz[3]).padStart(2, '0');
+    return `${d}.${m}.${y}`;
+  }
+  // ГГГГ-ММ-ДД
+  const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return `${iso[3]}.${iso[2]}.${iso[1]}`;
+  // Д.М.ГГГГ без ведущих нулей
+  const short = raw.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (short) return `${short[1].padStart(2,'0')}.${short[2].padStart(2,'0')}.${short[3]}`;
+  return raw;
+}
+
 function formatDateRussian(dateStr) {
   // Из ДД.ММ.ГГГГ в "28 июня 2026"
   const months = ['января','февраля','марта','апреля','мая','июня',
@@ -381,7 +403,10 @@ async function loadData() {
     let found = null;
     for (const row of rows) {
       const cells = row.c.map(c => c ? (c.v !== null && c.v !== undefined ? String(c.v) : '') : '');
-      if (cells[COL_DATE] && cells[COL_DATE].trim() === today) {
+      const rawDate = cells[COL_DATE].trim();
+      // Нормализуем дату из таблицы к формату ДД.ММ.ГГГГ
+      const normalised = normaliseDate(rawDate);
+      if (normalised === today) {
         found = cells;
         break;
       }
