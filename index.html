@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Теилим, сгулот и йорцайты</title>
+<title>Община «Бейт Шимшон»</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   html, body {
-    background-color: #0e0e10 !important;
+    background-color: #0e0e10;
     color: #e8e4d8;
     font-family: 'Inter', sans-serif;
     min-height: 100%;
@@ -125,6 +125,7 @@
     font-weight: 300;
     line-height: 1.75;
     color: #e8e4d8;
+    white-space: pre-wrap;
   }
 
   .section-text.tehilim {
@@ -134,6 +135,9 @@
     color: #d4c99a;
     line-height: 1.6;
   }
+
+  .shabbat-section { border-left: 2px solid #c9a84c; padding-left: 14px; }
+  .shabbat-text { font-size: 14px; font-weight: 300; color: #d4c99a; line-height: 1.75; white-space: pre-wrap; }
 
   .yortsait-list { display: flex; flex-direction: column; gap: 6px; }
 
@@ -153,6 +157,13 @@
     color: #7a6330;
   }
 
+  .community-yortsait .section-text {
+    color: #c9a84c;
+    font-size: 15px;
+  }
+
+  .community-yortsait .section-text strong { font-weight: 500; }
+
   .card-footer {
     background: #111113;
     border-top: 1px solid #222228;
@@ -163,19 +174,21 @@
   }
 
   .footer-text { font-size: 11px; color: #7a7870; letter-spacing: 0.04em; }
-  .community-yortsait .section-text {
-    color: #c9a84c;
-    font-size: 15px;
-  }
-
-  .community-yortsait .section-text strong {
-    font-weight: 500;
-  }
-
-  .shabbat-section { border-left: 2px solid #c9a84c; padding-left: 14px; }
-  .shabbat-text { font-size: 14px; font-weight: 300; color: #d4c99a; line-height: 1.75; }
-
   .candle { font-size: 16px; opacity: 0.6; }
+
+  .loading {
+    color: #7a7870;
+    font-size: 14px;
+    text-align: center;
+    padding: 40px;
+  }
+
+  .error {
+    color: #c0392b;
+    font-size: 14px;
+    text-align: center;
+    padding: 40px;
+  }
 
   @media (max-width: 500px) {
     .card-header, .card-body { padding-left: 20px; padding-right: 20px; }
@@ -189,60 +202,200 @@
 
 <div class="page-title">Уважаемые друзья, члены общины «Бейт Шимшон»!</div>
 
-<div class="card">
-  <div class="card-header">
-    <div class="label">Еврейский календарь</div>
-    <div class="date-hebrew">22 Сивана 5786 года</div>
-    <div class="date-russian">28 июня 2026</div>
-  </div>
-
-  <div class="card-body">
-
-    <div class="section shabbat-section">
-      <div class="section-label"><span>✡️</span> Шаббат</div>
-      <div class="section-text shabbat-text">Дорогие друзья! Шаббат шалом!<br><br>Пятница 26 июня 2026<br>20:59 Зажигание Шаббатних свечей<br><br>Суббота 27 июня 2026<br>9:30 Шахарит. Чтение Торы.<br>22:32 Окончание Субботы.</div>
-    </div>
-
-    <div class="section">
-      <div class="section-label"><span>📖</span> Теhилим</div>
-      <div class="section-text tehilim">Для тех, кто читает Теhилим по дням месяца, сегодняшние главы: 106, 107</div>
-    </div>
-
-    <div class="section">
-      <div class="section-label"><span>📜</span> Общее</div>
-      <div class="section-text">В этот день у пророчицы Мирьям — сестры Моше Рабейну — появились признаки проказы и она была заключена на семидневный карантин до 29 Сивана (Бемидбар 12, 1–15).</div>
-    </div>
-
-    <div class="section">
-      <div class="section-label"><span>🕯</span> Йорцайт праведников</div>
-      <div class="yortsait-list">
-        <div class="yortsait-item">Рав Давид (бен рав Нафтали Мирельш) Френкель, автор книги Корбан а-Эда</div>
-        <div class="yortsait-item">Рав Йеhуда Лейб (бен Ашер Зелиг) Маргалиот</div>
-        <div class="yortsait-item">Рав Моше Йерухам (бен рав Менахем Мендл) Моргенштерн</div>
-        <div class="yortsait-item">Рав Элияhу (бен рав Йосэф Рефоэль) Бхор Хазан</div>
-        <div class="yortsait-item">Рав Йосэф Лейб (бен рав Зусман) Сойфер из Пакша, автор книги Ялкут Сойфер</div>
-        <div class="yortsait-item">Рав Хаим Дов (бен рав Шалом) Гальперин из Васлуя</div>
-        <div class="yortsait-item">Рав Итамар (бен рав Меир) из Надворны</div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-label"><span>✨</span> Дополнительно</div>
-      <div class="section-text">Сновидения в этот день: к добру.</div>
-    </div>
-
-    <div class="section community-yortsait">
-      <div class="section-label"><span>🕍</span> Йорцайт общины</div>
-      <div class="section-text">Сегодня йорцайт у членов нашей общины: <strong>Аарон Ицкович</strong>, да упокоится душа его в Ган Эдене</div>
-    </div>
-
-  </div>
-
-  <div class="card-footer">
-    <span class="footer-text">Теилим, сгулот и йорцайты</span>
-    <span class="candle">🕯</span>
-  </div>
+<div class="card" id="card">
+  <div class="loading">Загрузка данных...</div>
 </div>
 
+<script>
+// ─── Настройки ───────────────────────────────────────────
+const SPREADSHEET_ID = '1OdL5dt4clO7dwMnTPfArrlmX7TuagNneSY5mKKYfRDo';
+const DATA_TAB = 'data_tab';
+
+// Индексы колонок (0-based)
+const COL_DATE        = 0;   // A — Дата
+const COL_HEBREW_DATE = 1;   // B — Дата по еврейскому календарю
+const COL_TEHILIM     = 2;   // C — Теилим
+const COL_GENERAL     = 3;   // D — Общее
+const COL_YORTSAIT    = 4;   // E — Йорцайт праведников
+const COL_ADDITIONAL  = 5;   // F — Дополнительно
+const COL_SHABBAT     = 10;  // K — Шаббат
+const COL_COMMUNITY   = 8;   // I — Йорцайт членов общины
+const COL_GENDER      = 9;   // J — Пол
+
+// ─── Вспомогательные функции ─────────────────────────────
+
+function getTodayStr() {
+  const now = new Date();
+  const d = String(now.getDate()).padStart(2, '0');
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const y = now.getFullYear();
+  return `${d}.${m}.${y}`;
+}
+
+function formatDateRussian(dateStr) {
+  // Из ДД.ММ.ГГГГ в "28 июня 2026"
+  const months = ['января','февраля','марта','апреля','мая','июня',
+                  'июля','августа','сентября','октября','ноября','декабря'];
+  const [d, m, y] = dateStr.split('.');
+  return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
+}
+
+function cell(row, idx) {
+  return (row[idx] || '').trim();
+}
+
+// ─── Построение карточки ─────────────────────────────────
+
+function buildCard(row) {
+  const dateStr     = cell(row, COL_DATE);
+  const hebrewDate  = cell(row, COL_HEBREW_DATE);
+  const tehilim     = cell(row, COL_TEHILIM);
+  const general     = cell(row, COL_GENERAL);
+  const yortsait    = cell(row, COL_YORTSAIT);
+  const additional  = cell(row, COL_ADDITIONAL);
+  const shabbat     = cell(row, COL_SHABBAT);
+  const community   = cell(row, COL_COMMUNITY);
+  const gender      = cell(row, COL_GENDER).toLowerCase();
+
+  // Фраза для йорцайта общины
+  let communityPhrase = '';
+  if (community) {
+    const soul = (gender === 'ж') ? 'да упокоится душа её в Ган Эдене' : 'да упокоится душа его в Ган Эдене';
+    communityPhrase = `Сегодня йорцайт у членов нашей общины: <strong>${community}</strong>, ${soul}`;
+  }
+
+  // Йорцайт праведников — разбиваем по точке на отдельные имена
+  let yortsaitHTML = '';
+  if (yortsait) {
+    // Убираем "**Сегодня йорцайт:**" и "__Сегодня йорцайт:__" в начале
+    const cleaned = yortsait
+      .replace(/\*\*Сегодня йорцайт:\*\*/gi, '')
+      .replace(/__Сегодня йорцайт:__/gi, '')
+      .replace(/Сегодня йорцайт:/gi, '')
+      .trim();
+
+    const items = cleaned.split('.').map(s => s.trim()).filter(s => s.length > 2);
+    yortsaitHTML = items.map(i => `<div class="yortsait-item">${i}</div>`).join('');
+  }
+
+  let html = `
+    <div class="card-header">
+      <div class="label">Еврейский календарь</div>
+      <div class="date-hebrew">${hebrewDate || dateStr}</div>
+      <div class="date-russian">${formatDateRussian(dateStr)}</div>
+    </div>
+    <div class="card-body">
+  `;
+
+  // Шаббат (если есть)
+  if (shabbat) {
+    html += `
+      <div class="section shabbat-section">
+        <div class="section-label"><span>✡️</span> Шаббат</div>
+        <div class="section-text shabbat-text">${shabbat}</div>
+      </div>
+    `;
+  }
+
+  // Теилим
+  if (tehilim) {
+    html += `
+      <div class="section">
+        <div class="section-label"><span>📖</span> Теhилим</div>
+        <div class="section-text tehilim">${tehilim}</div>
+      </div>
+    `;
+  }
+
+  // Общее
+  if (general) {
+    html += `
+      <div class="section">
+        <div class="section-label"><span>📜</span> Общее</div>
+        <div class="section-text">${general}</div>
+      </div>
+    `;
+  }
+
+  // Йорцайт праведников
+  if (yortsaitHTML) {
+    html += `
+      <div class="section">
+        <div class="section-label"><span>🕯</span> Йорцайт праведников</div>
+        <div class="yortsait-list">${yortsaitHTML}</div>
+      </div>
+    `;
+  }
+
+  // Дополнительно
+  if (additional) {
+    html += `
+      <div class="section">
+        <div class="section-label"><span>✨</span> Дополнительно</div>
+        <div class="section-text">${additional}</div>
+      </div>
+    `;
+  }
+
+  // Йорцайт общины
+  if (communityPhrase) {
+    html += `
+      <div class="section community-yortsait">
+        <div class="section-label"><span>🕍</span> Йорцайт общины</div>
+        <div class="section-text">${communityPhrase}</div>
+      </div>
+    `;
+  }
+
+  html += `
+    </div>
+    <div class="card-footer">
+      <span class="footer-text">Теилим, сгулот и йорцайты</span>
+      <span class="candle">🕯</span>
+    </div>
+  `;
+
+  return html;
+}
+
+// ─── Загрузка данных ─────────────────────────────────────
+
+async function loadData() {
+  const card = document.getElementById('card');
+  const today = getTodayStr();
+
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(DATA_TAB)}`;
+    const resp = await fetch(url);
+    const text = await resp.text();
+
+    // Google возвращает JSONP — вырезаем чистый JSON
+    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/)[1]);
+    const rows = json.table.rows;
+
+    // Ищем строку с сегодняшней датой
+    let found = null;
+    for (const row of rows) {
+      const cells = row.c.map(c => c ? (c.v !== null && c.v !== undefined ? String(c.v) : '') : '');
+      if (cells[COL_DATE] && cells[COL_DATE].trim() === today) {
+        found = cells;
+        break;
+      }
+    }
+
+    if (!found) {
+      card.innerHTML = `<div class="error">Данные на сегодня (${today}) не найдены в таблице.</div>`;
+      return;
+    }
+
+    card.innerHTML = buildCard(found);
+
+  } catch (e) {
+    card.innerHTML = `<div class="error">Ошибка загрузки данных: ${e.message}</div>`;
+  }
+}
+
+loadData();
+</script>
 </body>
 </html>
