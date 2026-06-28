@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Теилим, сгулот и йорцайты</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background-color: #0e0e10 !important;
+    color: #e8e4d8;
+    font-family: 'Inter', sans-serif;
+    min-height: 100%;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+    min-height: 100vh;
+  }
+
+  .page-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+    max-width: 680px;
+    width: 100%;
+    margin-bottom: 24px;
+    line-height: 1.4;
+    padding: 0 8px;
+  }
+
+  .card {
+    background: #17171a;
+    border: 1px solid #2a2a30;
+    border-radius: 4px;
+    width: 100%;
+    max-width: 680px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  }
+
+  .card-header {
+    padding: 32px 36px 28px;
+    border-bottom: 1px solid #222228;
+    position: relative;
+  }
+
+  .card-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #c9a84c, transparent);
+  }
+
+  .label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #c9a84c;
+    margin-bottom: 10px;
+  }
+
+  .date-hebrew {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 38px;
+    font-weight: 600;
+    line-height: 1.1;
+    color: #e8e4d8;
+  }
+
+  .date-russian {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-style: italic;
+    color: #7a7870;
+    margin-top: 8px;
+  }
+
+  .card-body {
+    padding: 0 36px 32px;
+  }
+
+  .section {
+    padding: 24px 0;
+    border-bottom: 1px solid #222228;
+  }
+
+  .section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #7a6330;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #222228;
+  }
+
+  .section-text {
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.75;
+    color: #e8e4d8;
+  }
+
+  .section-text.tehilim {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: #d4c99a;
+    line-height: 1.6;
+  }
+
+  .yortsait-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .yortsait-item {
+    font-size: 13.5px;
+    font-weight: 300;
+    color: #e8e4d8;
+    line-height: 1.6;
+    padding-left: 14px;
+    position: relative;
+  }
+
+  .yortsait-item::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: #7a6330;
+  }
+
+  .card-footer {
+    background: #111113;
+    border-top: 1px solid #222228;
+    padding: 14px 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-text { font-size: 11px; color: #7a7870; letter-spacing: 0.04em; }
+  .community-yortsait .section-text {
+    color: #c9a84c;
+    font-size: 15px;
+  }
+
+  .community-yortsait .section-text strong {
+    font-weight: 500;
+  }
+
+  .shabbat-section { border-left: 2px solid #c9a84c; padding-left: 14px; }
+  .shabbat-text { font-size: 14px; font-weight: 300; color: #d4c99a; line-height: 1.75; }
+
+  .candle { font-size: 16px; opacity: 0.6; }
+
+  @media (max-width: 500px) {
+    .card-header, .card-body { padding-left: 20px; padding-right: 20px; }
+    .card-footer { padding-left: 20px; padding-right: 20px; }
+    .date-hebrew { font-size: 28px; }
+    .page-title { font-size: 22px; }
+  }
+</style>
+</head>
+<body style="background-color:#0e0e10;">
+
+<div class="page-title">Уважаемые друзья, члены общины «Бейт Шимшон»!</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="label">Еврейский календарь</div>
+    <div class="date-hebrew">22 Сивана 5786 года</div>
+    <div class="date-russian">28 июня 2026</div>
+  </div>
+
+  <div class="card-body">
+
+    <div class="section shabbat-section">
+      <div class="section-label"><span>✡️</span> Шаббат</div>
+      <div class="section-text shabbat-text">Дорогие друзья! Шаббат шалом!<br><br>Пятница 26 июня 2026<br>20:59 Зажигание Шаббатних свечей<br><br>Суббота 27 июня 2026<br>9:30 Шахарит. Чтение Торы.<br>22:32 Окончание Субботы.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-label"><span>📖</span> Теhилим</div>
+      <div class="section-text tehilim">Для тех, кто читает Теhилим по дням месяца, сегодняшние главы: 106, 107</div>
+    </div>
+
+    <div class="section">
+      <div class="section-label"><span>📜</span> Общее</div>
+      <div class="section-text">В этот день у пророчицы Мирьям — сестры Моше Рабейну — появились признаки проказы и она была заключена на семидневный карантин до 29 Сивана (Бемидбар 12, 1–15).</div>
+    </div>
+
+    <div class="section">
+      <div class="section-label"><span>🕯</span> Йорцайт праведников</div>
+      <div class="yortsait-list">
+        <div class="yortsait-item">Рав Давид (бен рав Нафтали Мирельш) Френкель, автор книги Корбан а-Эда</div>
+        <div class="yortsait-item">Рав Йеhуда Лейб (бен Ашер Зелиг) Маргалиот</div>
+        <div class="yortsait-item">Рав Моше Йерухам (бен рав Менахем Мендл) Моргенштерн</div>
+        <div class="yortsait-item">Рав Элияhу (бен рав Йосэф Рефоэль) Бхор Хазан</div>
+        <div class="yortsait-item">Рав Йосэф Лейб (бен рав Зусман) Сойфер из Пакша, автор книги Ялкут Сойфер</div>
+        <div class="yortsait-item">Рав Хаим Дов (бен рав Шалом) Гальперин из Васлуя</div>
+        <div class="yortsait-item">Рав Итамар (бен рав Меир) из Надворны</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label"><span>✨</span> Дополнительно</div>
+      <div class="section-text">Сновидения в этот день: к добру.</div>
+    </div>
+
+    <div class="section community-yortsait">
+      <div class="section-label"><span>🕍</span> Йорцайт общины</div>
+      <div class="section-text">Сегодня йорцайт у членов нашей общины: <strong>Аарон Ицкович</strong>, да упокоится душа его в Ган Эдене</div>
+    </div>
+
+  </div>
+
+  <div class="card-footer">
+    <span class="footer-text">Теилим, сгулот и йорцайты</span>
+    <span class="candle">🕯</span>
+  </div>
+</div>
+
+</body>
+</html>
