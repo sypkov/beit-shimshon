@@ -168,6 +168,22 @@
 
   .community-yortsait .section-text strong { font-weight: 500; }
 
+  .youtube-wrapper {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+
+  .youtube-wrapper iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
   .card-footer {
     background: #111113;
     border-top: 1px solid #222228;
@@ -211,22 +227,19 @@
 </div>
 
 <script>
-// ─── Настройки ───────────────────────────────────────────
 const SPREADSHEET_ID = '1OdL5dt4clO7dwMnTPfArrlmX7TuagNneSY5mKKYfRDo';
 const DATA_TAB = 'data_tab';
 
-// Индексы колонок (0-based)
-const COL_DATE        = 0;   // A — Дата
-const COL_HEBREW_DATE = 1;   // B — Дата по еврейскому календарю
-const COL_TEHILIM     = 2;   // C — Теилим
-const COL_GENERAL     = 3;   // D — Общее
-const COL_YORTSAIT    = 4;   // E — Йорцайт праведников
-const COL_ADDITIONAL  = 5;   // F — Дополнительно
-const COL_SHABBAT     = 10;  // K — Шаббат
-const COL_COMMUNITY   = 8;   // I — Йорцайт членов общины
-const COL_GENDER      = 9;   // J — Пол
-
-// ─── Вспомогательные функции ─────────────────────────────
+const COL_DATE        = 0;
+const COL_HEBREW_DATE = 1;
+const COL_TEHILIM     = 2;
+const COL_GENERAL     = 3;
+const COL_YORTSAIT    = 4;
+const COL_ADDITIONAL  = 5;
+const COL_SHABBAT     = 10;
+const COL_COMMUNITY   = 8;
+const COL_GENDER      = 9;
+const COL_YOUTUBE     = 11;
 
 function getTodayStr() {
   const now = new Date();
@@ -236,12 +249,9 @@ function getTodayStr() {
   return `${d}.${m}.${y}`;
 }
 
-// Приводит разные форматы даты к ДД.ММ.ГГГГ
 function normaliseDate(raw) {
   if (!raw) return '';
-  // Уже ДД.ММ.ГГГГ
   if (/^\d{2}\.\d{2}\.\d{4}$/.test(raw)) return raw;
-  // Date(2026,5,29) — формат Google Sheets gviz (месяц 0-based)
   const gviz = raw.match(/Date\((\d+),(\d+),(\d+)\)/);
   if (gviz) {
     const y = gviz[1];
@@ -249,17 +259,14 @@ function normaliseDate(raw) {
     const d = String(gviz[3]).padStart(2, '0');
     return `${d}.${m}.${y}`;
   }
-  // ГГГГ-ММ-ДД
   const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (iso) return `${iso[3]}.${iso[2]}.${iso[1]}`;
-  // Д.М.ГГГГ без ведущих нулей
   const short = raw.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
   if (short) return `${short[1].padStart(2,'0')}.${short[2].padStart(2,'0')}.${short[3]}`;
   return raw;
 }
 
 function formatDateRussian(dateStr) {
-  // Из ДД.ММ.ГГГГ в "28 июня 2026"
   const months = ['января','февраля','марта','апреля','мая','июня',
                   'июля','августа','сентября','октября','ноября','декабря'];
   const [d, m, y] = dateStr.split('.');
@@ -270,39 +277,58 @@ function cell(row, idx) {
   return (row[idx] || '').trim();
 }
 
-// ─── Построение карточки ─────────────────────────────────
+// Извлекает YouTube video ID из ссылки
+function getYouTubeId(url) {
+  if (!url) return null;
+  const patterns = [
+    /youtu\.be\/([^?&]+)/,
+    /youtube\.com\/watch\?v=([^&]+)/,
+    /youtube\.com\/embed\/([^?&]+)/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
 
 function buildCard(row) {
-  const dateStr     = cell(row, COL_DATE);
-  const hebrewDate  = cell(row, COL_HEBREW_DATE);
-  const tehilim     = cell(row, COL_TEHILIM);
-  const general     = cell(row, COL_GENERAL);
-  const yortsait    = cell(row, COL_YORTSAIT);
-  const additional  = cell(row, COL_ADDITIONAL);
-  const shabbat     = cell(row, COL_SHABBAT);
-  const community   = cell(row, COL_COMMUNITY);
-  const gender      = cell(row, COL_GENDER).toLowerCase();
+  const dateStr    = cell(row, COL_DATE);
+  const hebrewDate = cell(row, COL_HEBREW_DATE);
+  const tehilim    = cell(row, COL_TEHILIM);
+  const general    = cell(row, COL_GENERAL);
+  const yortsait   = cell(row, COL_YORTSAIT);
+  const additional = cell(row, COL_ADDITIONAL);
+  const shabbat    = cell(row, COL_SHABBAT);
+  const community  = cell(row, COL_COMMUNITY);
+  const gender     = cell(row, COL_GENDER).toLowerCase();
+  const youtube    = cell(row, COL_YOUTUBE);
 
-  // Фраза для йорцайта общины
+  // Йорцайт членов общины
   let communityPhrase = '';
   if (community) {
     const soul = (gender === 'ж') ? 'да упокоится душа её в Ган Эдене' : 'да упокоится душа его в Ган Эдене';
     communityPhrase = `Сегодня йорцайт у членов нашей общины: <strong>${community}</strong>, ${soul}`;
   }
 
-  // Йорцайт праведников — разбиваем по точке на отдельные имена
+  // Йорцайт праведников
   let yortsaitHTML = '';
   if (yortsait) {
-    // Убираем "**Сегодня йорцайт:**" и "__Сегодня йорцайт:__" в начале
     const cleaned = yortsait
       .replace(/\*\*Сегодня йорцайт:\*\*/gi, '')
       .replace(/__Сегодня йорцайт:__/gi, '')
       .replace(/Сегодня йорцайт:/gi, '')
       .trim();
-
     const items = cleaned.split('.').map(s => s.trim()).filter(s => s.length > 2);
     yortsaitHTML = items.map(i => `<div class="yortsait-item">${i}</div>`).join('');
   }
+
+  // YouTube embed
+  const ytId = getYouTubeId(youtube);
+  const ytHTML = ytId ? `
+    <div class="youtube-wrapper">
+      <iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
+    </div>` : '';
 
   let html = `
     <div class="card-header">
@@ -313,24 +339,40 @@ function buildCard(row) {
     <div class="card-body">
   `;
 
-  // Шаббат (если есть)
+  // Шаббат
   if (shabbat) {
     html += `
       <div class="section shabbat-section">
         <div class="section-label"><span>✡️</span> Шаббат</div>
         <div class="section-text shabbat-text">${shabbat}</div>
-      </div>
-    `;
+      </div>`;
+  }
+
+  // Йорцайт членов общины
+  if (communityPhrase) {
+    html += `
+      <div class="section community-yortsait">
+        <div class="section-label"><span>🕍</span> Йорцайт членов общины</div>
+        <div class="section-text">${communityPhrase}</div>
+      </div>`;
+  }
+
+  // YouTube
+  if (ytHTML) {
+    html += `
+      <div class="section">
+        <div class="section-label"><span>▶️</span> Видео</div>
+        ${ytHTML}
+      </div>`;
   }
 
   // Теилим
   if (tehilim) {
     html += `
       <div class="section">
-        <div class="section-label"><span>📖</span> Теhилим</div>
+        <div class="section-label"><span>📖</span> Теилим</div>
         <div class="section-text tehilim">${tehilim}</div>
-      </div>
-    `;
+      </div>`;
   }
 
   // Общее
@@ -339,8 +381,7 @@ function buildCard(row) {
       <div class="section">
         <div class="section-label"><span>📜</span> Общее</div>
         <div class="section-text">${general}</div>
-      </div>
-    `;
+      </div>`;
   }
 
   // Йорцайт праведников
@@ -349,8 +390,7 @@ function buildCard(row) {
       <div class="section">
         <div class="section-label"><span>🕯</span> Йорцайт праведников</div>
         <div class="yortsait-list">${yortsaitHTML}</div>
-      </div>
-    `;
+      </div>`;
   }
 
   // Дополнительно
@@ -359,18 +399,7 @@ function buildCard(row) {
       <div class="section">
         <div class="section-label"><span>✨</span> Дополнительно</div>
         <div class="section-text">${additional}</div>
-      </div>
-    `;
-  }
-
-  // Йорцайт общины
-  if (communityPhrase) {
-    html += `
-      <div class="section community-yortsait">
-        <div class="section-label"><span>🕍</span> Йорцайт общины</div>
-        <div class="section-text">${communityPhrase}</div>
-      </div>
-    `;
+      </div>`;
   }
 
   html += `
@@ -384,8 +413,6 @@ function buildCard(row) {
   return html;
 }
 
-// ─── Загрузка данных ─────────────────────────────────────
-
 async function loadData() {
   const card = document.getElementById('card');
   const today = getTodayStr();
@@ -394,19 +421,13 @@ async function loadData() {
     const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(DATA_TAB)}`;
     const resp = await fetch(url);
     const text = await resp.text();
-
-    // Google возвращает JSONP — вырезаем чистый JSON
     const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/)[1]);
     const rows = json.table.rows;
 
-    // Ищем строку с сегодняшней датой
     let found = null;
     for (const row of rows) {
       const cells = row.c.map(c => c ? (c.v !== null && c.v !== undefined ? String(c.v) : '') : '');
-      const rawDate = cells[COL_DATE].trim();
-      // Нормализуем дату из таблицы к формату ДД.ММ.ГГГГ
-      const normalised = normaliseDate(rawDate);
-      if (normalised === today) {
+      if (normaliseDate(cells[COL_DATE].trim()) === today) {
         found = cells;
         break;
       }
