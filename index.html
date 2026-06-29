@@ -4,10 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Община «Бейт Шимшон» (г. Саратов)</title>
+<link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Бейт Шимшон">
 <meta name="application-name" content="Бейт Шимшон">
+<meta name="theme-color" content="#0e0e10">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap');
 
@@ -446,6 +450,10 @@ async function loadData() {
 }
 
 loadData();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/beit-shimshon/sw.js');
+}
 </script>
 </body>
 </html>
