@@ -273,8 +273,14 @@ function normaliseDate(raw) {
 function formatDateRussian(dateStr) {
   const months = ['января','февраля','марта','апреля','мая','июня',
                   'июля','августа','сентября','октября','ноября','декабря'];
-  const [d, m, y] = dateStr.split('.');
-  return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
+  // dateStr всегда в формате ДД.ММ.ГГГГ после normaliseDate
+  const parts = dateStr.split('.');
+  if (parts.length !== 3) return dateStr;
+  const d = parseInt(parts[0]);
+  const m = parseInt(parts[1]) - 1;
+  const y = parts[2];
+  if (isNaN(d) || isNaN(m)) return dateStr;
+  return `${d} ${months[m]} ${y}`;
 }
 
 function cell(row, idx) {
@@ -338,7 +344,7 @@ function buildCard(row) {
     <div class="card-header">
       <div class="label">Еврейский календарь</div>
       <div class="date-hebrew">${hebrewDate || dateStr}</div>
-      <div class="date-russian">${formatDateRussian(dateStr)}</div>
+      <div class="date-russian">${formatDateRussian(normaliseDate(dateStr))}</div>
     </div>
     <div class="card-body">
   `;
