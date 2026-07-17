@@ -188,6 +188,32 @@
     border: none;
   }
 
+  .video-note {
+    font-size: 12.5px;
+    font-style: italic;
+    color: #7a7870;
+    margin-bottom: 12px;
+  }
+
+  .tiktok-wrapper {
+    display: flex;
+    justify-content: center;
+  }
+
+  .zmanim-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .zmanim-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 13.5px;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .zmanim-label { color: #7a7870; }
+  .zmanim-value { color: #e8e4d8; font-weight: 400; white-space: nowrap; }
+
   .card-footer {
     background: #111113;
     border-top: 1px solid #222228;
@@ -233,17 +259,38 @@
 <script>
 const SPREADSHEET_ID = '1OdL5dt4clO7dwMnTPfArrlmX7TuagNneSY5mKKYfRDo';
 const DATA_TAB = 'data_tab';
+const ZMANIM_TAB = 'zmanim';
 
+// --- data_tab columns ---
 const COL_DATE        = 0;
 const COL_HEBREW_DATE = 1;
 const COL_TEHILIM     = 2;
 const COL_GENERAL     = 3;
 const COL_YORTSAIT    = 4;
-const COL_ADDITIONAL  = 5;
-const COL_SHABBAT     = 10;
+const COL_ADDITIONAL  = 5;  // "Толкование сновидений" (бывшее "Дополнительно")
 const COL_COMMUNITY   = 8;
 const COL_GENDER      = 9;
+const COL_SHABBAT     = 10;
 const COL_YOUTUBE     = 11;
+const COL_TIKTOK      = 12; // "Короткое видео"
+
+// --- zmanim columns ---
+// ПРЕДПОЛОЖЕНИЕ: дата в листе zmanim находится в колонке A (индекс 0), как в data_tab.
+const ZCOL_DATE            = 0;
+const ZCOL_STARS_OUT       = 2;  // C — Выход звёзд
+const ZCOL_MIDNIGHT        = 3;  // D — Полночь
+const ZCOL_ALOT_HASHACHAR  = 4;  // E — Алот а-Шахар
+const ZCOL_MISHEYAKIR      = 5;  // F — мишеякир (талит и тфилин)
+const ZCOL_SUNRISE         = 6;  // G — Восход солнца
+const ZCOL_SHMA_END        = 7;  // H — Окончание чтения Шма
+const ZCOL_AMIDA_END       = 8;  // I — Окончание чтения Амиды
+const ZCOL_NOON            = 9;  // J — Полдень
+const ZCOL_MINCHA_GDOLA    = 10; // K — Минха Гдола
+const ZCOL_ET_RATZON       = 11; // L — Эт Рацон
+const ZCOL_MINCHA_KTANA    = 12; // M — Минха Ктана
+const ZCOL_MINCHA          = 13; // N — Минха
+const ZCOL_SUNSET          = 15; // P — Заход солнца
+const ZCOL_HALACHIC_HOUR   = 17; // R — Длина дневного алахического часа
 
 function getTodayStr() {
   const now = new Date();
@@ -273,7 +320,6 @@ function normaliseDate(raw) {
 function formatDateRussian(dateStr) {
   const months = ['января','февраля','марта','апреля','мая','июня',
                   'июля','августа','сентября','октября','ноября','декабря'];
-  // dateStr всегда в формате ДД.ММ.ГГГГ после normaliseDate
   const parts = dateStr.split('.');
   if (parts.length !== 3) return dateStr;
   const d = parseInt(parts[0]);
@@ -283,8 +329,31 @@ function formatDateRussian(dateStr) {
   return `${d} ${months[m]} ${y}`;
 }
 
+function parseDateToObj(ddmmyyyy) {
+  if (!ddmmyyyy) return null;
+  const parts = ddmmyyyy.split('.');
+  if (parts.length !== 3) return null;
+  const d = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10) - 1;
+  const y = parseInt(parts[2], 10);
+  if (isNaN(d) || isNaN(m) || isNaN(y)) return null;
+  return new Date(y, m, d);
+}
+
 function cell(row, idx) {
   return (row[idx] || '').trim();
+}
+
+function mapRowCells(row) {
+  return row.c.map(c => c ? (c.v !== null && c.v !== undefined ? String(c.v) : '') : '');
+}
+
+async function fetchSheetRows(sheetName) {
+  const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+  const resp = await fetch(url);
+  const text = await resp.text();
+  const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/)[1]);
+  return json.table.rows;
 }
 
 // Извлекает YouTube video ID из ссылки
@@ -302,7 +371,51 @@ function getYouTubeId(url) {
   return null;
 }
 
-function buildCard(row) {
+// Строит HTML для официального TikTok embed (blockquote), исполнение embed.js — отдельно
+function getTikTokEmbedHTML(url) {
+  if (!url) return '';
+  const idMatch = url.match(/video\/(\d+)/);
+  const videoId = idMatch ? idMatch[1] : '';
+  return `
+    <blockquote class="tiktok-embed" cite="${url}"${videoId ? ` data-video-id="${videoId}"` : ''} style="max-width: 325px;min-width: 325px;margin:0 auto;">
+      <section></section>
+    </blockquote>`;
+}
+
+function loadTikTokScript() {
+  // Каждый раз добавляем свежий script-тег — innerHTML не исполняет вложенные <script>,
+  // а сам embed.js при повторном добавлении заново сканирует страницу на .tiktok-embed
+  const s = document.createElement('script');
+  s.src = 'https://www.tiktok.com/embed.js';
+  s.async = true;
+  document.body.appendChild(s);
+}
+
+function buildZmanimHTML(zRow) {
+  if (!zRow) return '';
+  const rows = [
+    ['Выход звёзд', cell(zRow, ZCOL_STARS_OUT)],
+    ['Полночь', cell(zRow, ZCOL_MIDNIGHT)],
+    ['Алот а-Шахар (утренняя заря)', cell(zRow, ZCOL_ALOT_HASHACHAR)],
+    ['Время надевания талита и тфилин (мишеякир)', cell(zRow, ZCOL_MISHEYAKIR)],
+    ['Восход солнца', cell(zRow, ZCOL_SUNRISE)],
+    ['Окончание чтения Шма', cell(zRow, ZCOL_SHMA_END)],
+    ['Окончание чтения Амиды', cell(zRow, ZCOL_AMIDA_END)],
+    ['Полдень', cell(zRow, ZCOL_NOON)],
+    ['Минха Гдола', cell(zRow, ZCOL_MINCHA_GDOLA)],
+    ['Эт Рацон', cell(zRow, ZCOL_ET_RATZON)],
+    ['Минха Ктана', cell(zRow, ZCOL_MINCHA_KTANA)],
+    ['Минха', cell(zRow, ZCOL_MINCHA)],
+    ['Заход солнца', cell(zRow, ZCOL_SUNSET)],
+    ['Длина дневного алахического часа', cell(zRow, ZCOL_HALACHIC_HOUR)],
+  ];
+  return rows
+    .filter(([, v]) => v)
+    .map(([label, v]) => `<div class="zmanim-item"><span class="zmanim-label">${label}</span><span class="zmanim-value">${v}</span></div>`)
+    .join('');
+}
+
+function buildCard(row, nearestYortsaits, zmanimRow) {
   const dateStr    = cell(row, COL_DATE);
   const hebrewDate = cell(row, COL_HEBREW_DATE);
   const tehilim    = cell(row, COL_TEHILIM);
@@ -313,8 +426,9 @@ function buildCard(row) {
   const community  = cell(row, COL_COMMUNITY);
   const gender     = cell(row, COL_GENDER).toLowerCase();
   const youtube    = cell(row, COL_YOUTUBE);
+  const tiktok     = cell(row, COL_TIKTOK);
 
-  // Йорцайт членов общины
+  // Йорцайт членов общины (сегодня)
   let communityPhrase = '';
   if (community) {
     const soul = (gender === 'ж') ? 'да упокоится душа её в Ган Эдене' : 'да упокоится душа его в Ган Эдене';
@@ -333,12 +447,27 @@ function buildCard(row) {
     yortsaitHTML = items.map(i => `<div class="yortsait-item">${i}</div>`).join('');
   }
 
+  // Ближайшие йорцайты членов общины (будущие даты)
+  let nearestHTML = '';
+  if (nearestYortsaits && nearestYortsaits.length) {
+    nearestHTML = nearestYortsaits.map(r => {
+      const soul = (r.gender === 'ж') ? 'да упокоится душа её в Ган Эдене' : 'да упокоится душа его в Ган Эдене';
+      return `<div class="yortsait-item">${formatDateRussian(r.dateStr)} — <strong>${r.name}</strong>, ${soul}</div>`;
+    }).join('');
+  }
+
   // YouTube embed
   const ytId = getYouTubeId(youtube);
   const ytHTML = ytId ? `
     <div class="youtube-wrapper">
       <iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
     </div>` : '';
+
+  // TikTok embed
+  const tiktokEmbed = getTikTokEmbedHTML(tiktok);
+
+  // Зманим Саратов
+  const zmanimHTML = buildZmanimHTML(zmanimRow);
 
   let html = `
     <div class="card-header">
@@ -358,21 +487,12 @@ function buildCard(row) {
       </div>`;
   }
 
-  // Йорцайт членов общины
+  // Йорцайт членов общины (сегодня)
   if (communityPhrase) {
     html += `
       <div class="section community-yortsait">
         <div class="section-label"><span>🕍</span> Йорцайт членов общины</div>
         <div class="section-text">${communityPhrase}</div>
-      </div>`;
-  }
-
-  // YouTube
-  if (ytHTML) {
-    html += `
-      <div class="section">
-        <div class="section-label"><span>▶️</span> Видео</div>
-        ${ytHTML}
       </div>`;
   }
 
@@ -385,12 +505,30 @@ function buildCard(row) {
       </div>`;
   }
 
+  // Короткое видео (между Теилим и Общее)
+  if (tiktokEmbed) {
+    html += `
+      <div class="section">
+        <div class="section-label"><span>🎬</span> Короткое видео</div>
+        <div class="tiktok-wrapper">${tiktokEmbed}</div>
+      </div>`;
+  }
+
   // Общее
   if (general) {
     html += `
       <div class="section">
         <div class="section-label"><span>📜</span> Общее</div>
         <div class="section-text">${general}</div>
+      </div>`;
+  }
+
+  // Ближайшие йорцайты членов общины (перед Йорцайт праведников)
+  if (nearestHTML) {
+    html += `
+      <div class="section">
+        <div class="section-label"><span>🕯</span> Ближайшие йорцайты членов общины</div>
+        <div class="yortsait-list">${nearestHTML}</div>
       </div>`;
   }
 
@@ -403,12 +541,31 @@ function buildCard(row) {
       </div>`;
   }
 
-  // Дополнительно
+  // Видео (между Йорцайт праведников и Толкование сновидений)
+  if (ytHTML) {
+    html += `
+      <div class="section">
+        <div class="section-label"><span>▶️</span> Видео</div>
+        <div class="video-note">Видео доступно к просмотру при включенном VPN</div>
+        ${ytHTML}
+      </div>`;
+  }
+
+  // Толкование сновидений (бывшее "Дополнительно")
   if (additional) {
     html += `
       <div class="section">
-        <div class="section-label"><span>✨</span> Дополнительно</div>
+        <div class="section-label"><span>✨</span> Толкование сновидений</div>
         <div class="section-text">${additional}</div>
+      </div>`;
+  }
+
+  // Зманим Саратов
+  if (zmanimHTML) {
+    html += `
+      <div class="section">
+        <div class="section-label"><span>⏳</span> Зманим Саратов</div>
+        <div class="zmanim-list">${zmanimHTML}</div>
       </div>`;
   }
 
@@ -426,20 +583,18 @@ function buildCard(row) {
 async function loadData() {
   const card = document.getElementById('card');
   const today = getTodayStr();
+  const todayObj = parseDateToObj(today);
 
   try {
-    const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(DATA_TAB)}`;
-    const resp = await fetch(url);
-    const text = await resp.text();
-    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/)[1]);
-    const rows = json.table.rows;
+    const dataRows = await fetchSheetRows(DATA_TAB);
 
     let found = null;
-    for (const row of rows) {
-      const cells = row.c.map(c => c ? (c.v !== null && c.v !== undefined ? String(c.v) : '') : '');
+    const allCells = [];
+    for (const row of dataRows) {
+      const cells = mapRowCells(row);
+      allCells.push(cells);
       if (normaliseDate(cells[COL_DATE].trim()) === today) {
         found = cells;
-        break;
       }
     }
 
@@ -448,7 +603,41 @@ async function loadData() {
       return;
     }
 
-    card.innerHTML = buildCard(found);
+    // Ближайшие в будущем йорцайты членов общины (из колонки I)
+    const nearest = allCells
+      .map(cells => {
+        const dateStr = normaliseDate(cell(cells, COL_DATE));
+        return {
+          dateStr,
+          name: cell(cells, COL_COMMUNITY),
+          gender: cell(cells, COL_GENDER).toLowerCase(),
+          dateObj: parseDateToObj(dateStr)
+        };
+      })
+      .filter(r => r.name && r.dateObj && todayObj && r.dateObj > todayObj)
+      .sort((a, b) => a.dateObj - b.dateObj)
+      .slice(0, 3);
+
+    // Зманим на сегодня
+    let zmanimRow = null;
+    try {
+      const zRows = await fetchSheetRows(ZMANIM_TAB);
+      for (const row of zRows) {
+        const cells = mapRowCells(row);
+        if (normaliseDate(cell(cells, ZCOL_DATE)) === today) {
+          zmanimRow = cells;
+          break;
+        }
+      }
+    } catch (e) {
+      // Лист zmanim необязателен — при ошибке просто не показываем раздел
+    }
+
+    card.innerHTML = buildCard(found, nearest, zmanimRow);
+
+    if (cell(found, COL_TIKTOK)) {
+      loadTikTokScript();
+    }
 
   } catch (e) {
     card.innerHTML = `<div class="error">Ошибка загрузки данных: ${e.message}</div>`;
