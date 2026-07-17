@@ -195,11 +195,6 @@
     margin-bottom: 12px;
   }
 
-  .tiktok-wrapper {
-    display: flex;
-    justify-content: center;
-  }
-
   .zmanim-list { display: flex; flex-direction: column; gap: 6px; }
 
   .zmanim-item {
@@ -272,7 +267,6 @@ const COL_COMMUNITY   = 8;
 const COL_GENDER      = 9;
 const COL_SHABBAT     = 10;
 const COL_YOUTUBE     = 11;
-const COL_TIKTOK      = 12; // "Короткое видео"
 
 // --- zmanim columns ---
 // ПРЕДПОЛОЖЕНИЕ: дата в листе zmanim находится в колонке A (индекс 0), как в data_tab.
@@ -340,12 +334,27 @@ function parseDateToObj(ddmmyyyy) {
   return new Date(y, m, d);
 }
 
+// row-элементы теперь объекты {v, f}: v — «сырое» значение (используется для дат/сравнений),
+// f — значение, отформатированное так же, как оно показано в самой таблице (используем для зманим,
+// чтобы время не превращалось в Date(1899,11,30,H,M,S)).
 function cell(row, idx) {
-  return (row[idx] || '').trim();
+  const c = row[idx];
+  return c ? (c.v || '').trim() : '';
 }
 
-function mapRowCells(row) {
-  return row.c.map(c => c ? (c.v !== null && c.v !== undefined ? String(c.v) : '') : '');
+function cellF(row, idx) {
+  const c = row[idx];
+  if (!c) return '';
+  return (c.f || c.v || '').trim();
+}
+
+function mapRow(row) {
+  return row.c.map(c => {
+    if (!c) return { v: '', f: '' };
+    const v = (c.v !== null && c.v !== undefined) ? String(c.v) : '';
+    const f = (c.f !== null && c.f !== undefined) ? String(c.f) : '';
+    return { v, f };
+  });
 }
 
 async function fetchSheetRows(sheetName) {
@@ -371,43 +380,23 @@ function getYouTubeId(url) {
   return null;
 }
 
-// Строит HTML для официального TikTok embed (blockquote), исполнение embed.js — отдельно
-function getTikTokEmbedHTML(url) {
-  if (!url) return '';
-  const idMatch = url.match(/video\/(\d+)/);
-  const videoId = idMatch ? idMatch[1] : '';
-  return `
-    <blockquote class="tiktok-embed" cite="${url}"${videoId ? ` data-video-id="${videoId}"` : ''} style="max-width: 325px;min-width: 325px;margin:0 auto;">
-      <section></section>
-    </blockquote>`;
-}
-
-function loadTikTokScript() {
-  // Каждый раз добавляем свежий script-тег — innerHTML не исполняет вложенные <script>,
-  // а сам embed.js при повторном добавлении заново сканирует страницу на .tiktok-embed
-  const s = document.createElement('script');
-  s.src = 'https://www.tiktok.com/embed.js';
-  s.async = true;
-  document.body.appendChild(s);
-}
-
 function buildZmanimHTML(zRow) {
   if (!zRow) return '';
   const rows = [
-    ['Выход звёзд', cell(zRow, ZCOL_STARS_OUT)],
-    ['Полночь', cell(zRow, ZCOL_MIDNIGHT)],
-    ['Алот а-Шахар (утренняя заря)', cell(zRow, ZCOL_ALOT_HASHACHAR)],
-    ['Время надевания талита и тфилин (мишеякир)', cell(zRow, ZCOL_MISHEYAKIR)],
-    ['Восход солнца', cell(zRow, ZCOL_SUNRISE)],
-    ['Окончание чтения Шма', cell(zRow, ZCOL_SHMA_END)],
-    ['Окончание чтения Амиды', cell(zRow, ZCOL_AMIDA_END)],
-    ['Полдень', cell(zRow, ZCOL_NOON)],
-    ['Минха Гдола', cell(zRow, ZCOL_MINCHA_GDOLA)],
-    ['Эт Рацон', cell(zRow, ZCOL_ET_RATZON)],
-    ['Минха Ктана', cell(zRow, ZCOL_MINCHA_KTANA)],
-    ['Минха', cell(zRow, ZCOL_MINCHA)],
-    ['Заход солнца', cell(zRow, ZCOL_SUNSET)],
-    ['Длина дневного алахического часа', cell(zRow, ZCOL_HALACHIC_HOUR)],
+    ['Выход звёзд', cellF(zRow, ZCOL_STARS_OUT)],
+    ['Полночь', cellF(zRow, ZCOL_MIDNIGHT)],
+    ['Алот а-Шахар (утренняя заря)', cellF(zRow, ZCOL_ALOT_HASHACHAR)],
+    ['Время надевания талита и тфилин (мишеякир)', cellF(zRow, ZCOL_MISHEYAKIR)],
+    ['Восход солнца', cellF(zRow, ZCOL_SUNRISE)],
+    ['Окончание чтения Шма', cellF(zRow, ZCOL_SHMA_END)],
+    ['Окончание чтения Амиды', cellF(zRow, ZCOL_AMIDA_END)],
+    ['Полдень', cellF(zRow, ZCOL_NOON)],
+    ['Минха Гдола', cellF(zRow, ZCOL_MINCHA_GDOLA)],
+    ['Эт Рацон', cellF(zRow, ZCOL_ET_RATZON)],
+    ['Минха Ктана', cellF(zRow, ZCOL_MINCHA_KTANA)],
+    ['Минха', cellF(zRow, ZCOL_MINCHA)],
+    ['Заход солнца', cellF(zRow, ZCOL_SUNSET)],
+    ['Длина дневного алахического часа', cellF(zRow, ZCOL_HALACHIC_HOUR)],
   ];
   return rows
     .filter(([, v]) => v)
@@ -426,7 +415,6 @@ function buildCard(row, nearestYortsaits, zmanimRow) {
   const community  = cell(row, COL_COMMUNITY);
   const gender     = cell(row, COL_GENDER).toLowerCase();
   const youtube    = cell(row, COL_YOUTUBE);
-  const tiktok     = cell(row, COL_TIKTOK);
 
   // Йорцайт членов общины (сегодня)
   let communityPhrase = '';
@@ -462,9 +450,6 @@ function buildCard(row, nearestYortsaits, zmanimRow) {
     <div class="youtube-wrapper">
       <iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
     </div>` : '';
-
-  // TikTok embed
-  const tiktokEmbed = getTikTokEmbedHTML(tiktok);
 
   // Зманим Саратов
   const zmanimHTML = buildZmanimHTML(zmanimRow);
@@ -502,15 +487,6 @@ function buildCard(row, nearestYortsaits, zmanimRow) {
       <div class="section">
         <div class="section-label"><span>📖</span> Теилим</div>
         <div class="section-text tehilim">${tehilim}</div>
-      </div>`;
-  }
-
-  // Короткое видео (между Теилим и Общее)
-  if (tiktokEmbed) {
-    html += `
-      <div class="section">
-        <div class="section-label"><span>🎬</span> Короткое видео</div>
-        <div class="tiktok-wrapper">${tiktokEmbed}</div>
       </div>`;
   }
 
@@ -591,9 +567,9 @@ async function loadData() {
     let found = null;
     const allCells = [];
     for (const row of dataRows) {
-      const cells = mapRowCells(row);
+      const cells = mapRow(row);
       allCells.push(cells);
-      if (normaliseDate(cells[COL_DATE].trim()) === today) {
+      if (normaliseDate(cell(cells, COL_DATE)) === today) {
         found = cells;
       }
     }
@@ -623,7 +599,7 @@ async function loadData() {
     try {
       const zRows = await fetchSheetRows(ZMANIM_TAB);
       for (const row of zRows) {
-        const cells = mapRowCells(row);
+        const cells = mapRow(row);
         if (normaliseDate(cell(cells, ZCOL_DATE)) === today) {
           zmanimRow = cells;
           break;
@@ -634,10 +610,6 @@ async function loadData() {
     }
 
     card.innerHTML = buildCard(found, nearest, zmanimRow);
-
-    if (cell(found, COL_TIKTOK)) {
-      loadTikTokScript();
-    }
 
   } catch (e) {
     card.innerHTML = `<div class="error">Ошибка загрузки данных: ${e.message}</div>`;
