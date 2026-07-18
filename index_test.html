@@ -195,6 +195,35 @@
     margin-bottom: 12px;
   }
 
+  .section-text.clamped {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .section-text.clamped.expanded {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+  }
+
+  .expand-btn {
+    margin-top: 12px;
+    background: none;
+    border: 1px solid #2a2a30;
+    color: #c9a84c;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .expand-btn:hover { border-color: #c9a84c; }
+
   .zmanim-list { display: flex; flex-direction: column; gap: 6px; }
 
   .zmanim-item {
@@ -388,6 +417,25 @@ function getYouTubeId(url) {
   return null;
 }
 
+// Склеивает колонки C и D листа Tanakh построчно парами: строка из C — выделенная (номер стиха/главы),
+// следующая за ней строка из D — обычным текстом. Так повторяется для каждой пары строк.
+function buildTanakhHTML(cText, dText) {
+  if (!cText && !dText) return '';
+  const cLines = cText ? cText.split(/\n+/).map(s => s.trim()).filter(Boolean) : [];
+  const dLines = dText ? dText.split(/\n+/).map(s => s.trim()).filter(Boolean) : [];
+  const len = Math.max(cLines.length, dLines.length, 1);
+  const pairs = [];
+  for (let i = 0; i < len; i++) {
+    const c = cLines[i] || '';
+    const d = dLines[i] || '';
+    const bits = [];
+    if (c) bits.push(`<strong>${c}</strong>`);
+    if (d) bits.push(d);
+    if (bits.length) pairs.push(bits.join('<br>'));
+  }
+  return pairs.join('<br><br>');
+}
+
 function buildZmanimHTML(zRow) {
   if (!zRow) return '';
   const rows = [
@@ -569,14 +617,12 @@ function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
 
   // Ежедневное изучение ТаНаХа — Танах Йоми
   if (tanakhC || tanakhD) {
-    const tanakhBody = [
-      tanakhC ? `<strong>${tanakhC}</strong>` : '',
-      tanakhD || ''
-    ].filter(Boolean).join('<br>');
+    const tanakhBody = buildTanakhHTML(tanakhC, tanakhD);
     html += `
       <div class="section">
         <div class="section-label"><span>📚</span> Ежедневное изучение ТаНаХа — Танах Йоми</div>
-        <div class="section-text">${tanakhBody}</div>
+        <div class="section-text clamped" id="tanakh-content">${tanakhBody}</div>
+        <button class="expand-btn" id="tanakh-toggle" onclick="toggleTanakh()">Развернуть</button>
       </div>`;
   }
 
@@ -589,6 +635,14 @@ function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
   `;
 
   return html;
+}
+
+function toggleTanakh() {
+  const el = document.getElementById('tanakh-content');
+  const btn = document.getElementById('tanakh-toggle');
+  if (!el || !btn) return;
+  const expanded = el.classList.toggle('expanded');
+  btn.textContent = expanded ? 'Свернуть' : 'Развернуть';
 }
 
 async function loadData() {
@@ -660,6 +714,14 @@ async function loadData() {
     }
 
     card.innerHTML = buildCard(found, nearest, zmanimRow, tanakhRow);
+
+    requestAnimationFrame(() => {
+      const el = document.getElementById('tanakh-content');
+      const btn = document.getElementById('tanakh-toggle');
+      if (el && btn && el.scrollHeight <= el.clientHeight + 2) {
+        btn.style.display = 'none';
+      }
+    });
 
   } catch (e) {
     card.innerHTML = `<div class="error">Ошибка загрузки данных: ${e.message}</div>`;
