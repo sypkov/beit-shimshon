@@ -195,6 +195,35 @@
     margin-bottom: 12px;
   }
 
+  .section-text.clamped {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .section-text.clamped.expanded {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+  }
+
+  .expand-btn {
+    margin-top: 12px;
+    background: none;
+    border: 1px solid #2a2a30;
+    color: #c9a84c;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .expand-btn:hover { border-color: #c9a84c; }
+
   .zmanim-list { display: flex; flex-direction: column; gap: 6px; }
 
   .zmanim-item {
@@ -255,6 +284,7 @@
 const SPREADSHEET_ID = '1OdL5dt4clO7dwMnTPfArrlmX7TuagNneSY5mKKYfRDo';
 const DATA_TAB = 'data_tab';
 const ZMANIM_TAB = 'zmanim';
+const TANAKH_TAB = 'Tanakh';
 
 // --- data_tab columns ---
 const COL_DATE        = 0;
@@ -285,6 +315,13 @@ const ZCOL_MINCHA_KTANA    = 12; // M — Минха Ктана
 const ZCOL_MINCHA          = 13; // N — Минха
 const ZCOL_SUNSET          = 15; // P — Заход солнца
 const ZCOL_HALACHIC_HOUR   = 17; // R — Длина дневного алахического часа
+
+// --- Tanakh columns ---
+// ПРЕДПОЛОЖЕНИЕ: дата в листе Tanakh находится в колонке A (индекс 0), как в data_tab.
+const TCOL_DATE   = 0;
+const TCOL_C      = 2; // C — Танах Йоми, выделенная часть
+const TCOL_D      = 3; // D — Танах Йоми, обычный текст
+const TCOL_WISDOM = 4; // E — Мудрость дня
 
 function getTodayStr() {
   const now = new Date();
@@ -380,6 +417,25 @@ function getYouTubeId(url) {
   return null;
 }
 
+// Склеивает колонки C и D листа Tanakh построчно парами: строка из C — выделенная (номер стиха/главы),
+// следующая за ней строка из D — обычным текстом. Так повторяется для каждой пары строк.
+function buildTanakhHTML(cText, dText) {
+  if (!cText && !dText) return '';
+  const cLines = cText ? cText.split(/\n+/).map(s => s.trim()).filter(Boolean) : [];
+  const dLines = dText ? dText.split(/\n+/).map(s => s.trim()).filter(Boolean) : [];
+  const len = Math.max(cLines.length, dLines.length, 1);
+  const pairs = [];
+  for (let i = 0; i < len; i++) {
+    const c = cLines[i] || '';
+    const d = dLines[i] || '';
+    const bits = [];
+    if (c) bits.push(`<strong>${c}</strong>`);
+    if (d) bits.push(d);
+    if (bits.length) pairs.push(bits.join('<br>'));
+  }
+  return pairs.join('<br><br>');
+}
+
 function buildZmanimHTML(zRow) {
   if (!zRow) return '';
   const rows = [
@@ -404,7 +460,7 @@ function buildZmanimHTML(zRow) {
     .join('');
 }
 
-function buildCard(row, nearestYortsaits, zmanimRow) {
+function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
   const dateStr    = cell(row, COL_DATE);
   const hebrewDate = cell(row, COL_HEBREW_DATE);
   const tehilim    = cell(row, COL_TEHILIM);
@@ -453,6 +509,11 @@ function buildCard(row, nearestYortsaits, zmanimRow) {
 
   // Зманим Саратов
   const zmanimHTML = buildZmanimHTML(zmanimRow);
+
+  // Мудрость дня / Танах Йоми
+  const wisdom  = tanakhRow ? cell(tanakhRow, TCOL_WISDOM) : '';
+  const tanakhC = tanakhRow ? cell(tanakhRow, TCOL_C) : '';
+  const tanakhD = tanakhRow ? cell(tanakhRow, TCOL_D) : '';
 
   let html = `
     <div class="card-header">
@@ -545,6 +606,26 @@ function buildCard(row, nearestYortsaits, zmanimRow) {
       </div>`;
   }
 
+  // Мудрость дня
+  if (wisdom) {
+    html += `
+      <div class="section">
+        <div class="section-label"><span>💡</span> Мудрость дня</div>
+        <div class="section-text">${wisdom}</div>
+      </div>`;
+  }
+
+  // Ежедневное изучение ТаНаХа — Танах Йоми
+  if (tanakhC || tanakhD) {
+    const tanakhBody = buildTanakhHTML(tanakhC, tanakhD);
+    html += `
+      <div class="section">
+        <div class="section-label"><span>📚</span> Ежедневное изучение ТаНаХа — Танах Йоми</div>
+        <div class="section-text clamped" id="tanakh-content">${tanakhBody}</div>
+        <button class="expand-btn" id="tanakh-toggle" onclick="toggleTanakh()">Развернуть</button>
+      </div>`;
+  }
+
   html += `
     </div>
     <div class="card-footer">
@@ -554,6 +635,14 @@ function buildCard(row, nearestYortsaits, zmanimRow) {
   `;
 
   return html;
+}
+
+function toggleTanakh() {
+  const el = document.getElementById('tanakh-content');
+  const btn = document.getElementById('tanakh-toggle');
+  if (!el || !btn) return;
+  const expanded = el.classList.toggle('expanded');
+  btn.textContent = expanded ? 'Свернуть' : 'Развернуть';
 }
 
 async function loadData() {
@@ -609,7 +698,30 @@ async function loadData() {
       // Лист zmanim необязателен — при ошибке просто не показываем раздел
     }
 
-    card.innerHTML = buildCard(found, nearest, zmanimRow);
+    // Мудрость дня / Танах Йоми на сегодня
+    let tanakhRow = null;
+    try {
+      const tRows = await fetchSheetRows(TANAKH_TAB);
+      for (const row of tRows) {
+        const cells = mapRow(row);
+        if (normaliseDate(cell(cells, TCOL_DATE)) === today) {
+          tanakhRow = cells;
+          break;
+        }
+      }
+    } catch (e) {
+      // Лист Tanakh необязателен — при ошибке просто не показываем разделы
+    }
+
+    card.innerHTML = buildCard(found, nearest, zmanimRow, tanakhRow);
+
+    requestAnimationFrame(() => {
+      const el = document.getElementById('tanakh-content');
+      const btn = document.getElementById('tanakh-toggle');
+      if (el && btn && el.scrollHeight <= el.clientHeight + 2) {
+        btn.style.display = 'none';
+      }
+    });
 
   } catch (e) {
     card.innerHTML = `<div class="error">Ошибка загрузки данных: ${e.message}</div>`;
