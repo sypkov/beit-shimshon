@@ -144,6 +144,28 @@
     line-height: 1.6;
   }
 
+  .text-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 14px 0;
+    color: #c9a84c;
+  }
+  .text-divider::before,
+  .text-divider::after {
+    content: '';
+    flex: 1;
+    max-width: 60px;
+    height: 1px;
+    background: #3a3730;
+  }
+  .text-divider span {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    letter-spacing: 0.15em;
+  }
+
   .shabbat-section { border-left: 2px solid #c9a84c; padding-left: 14px; }
   .shabbat-text { font-size: 14px; font-weight: 300; color: #d4c99a; line-height: 1.75; white-space: pre-wrap; }
 
@@ -436,6 +458,13 @@ function buildTanakhHTML(cText, dText) {
   return pairs.join('<br><br>');
 }
 
+// Заменяет "***" в тексте на красивый декоративный разделитель
+function withDividers(text) {
+  if (!text) return '';
+  const DIVIDER = '<div class="text-divider"><span>✦</span></div>';
+  return text.split('***').map(s => s.trim()).join(DIVIDER);
+}
+
 function buildZmanimHTML(zRow) {
   if (!zRow) return '';
   const rows = [
@@ -556,7 +585,7 @@ function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
     html += `
       <div class="section">
         <div class="section-label"><span>📜</span> Общее</div>
-        <div class="section-text">${general}</div>
+        <div class="section-text">${withDividers(general)}</div>
       </div>`;
   }
 
