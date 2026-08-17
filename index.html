@@ -479,7 +479,7 @@ function buildTanakhHTML(cText, dText) {
     const d = dLines[i] || '';
     const bits = [];
     if (c) bits.push(`<strong>${c}</strong>`);
-    if (d) bits.push(d);
+    if (d) bits.push(withDividers(d));
     if (bits.length) pairs.push(bits.join('<br>'));
   }
   return pairs.join('<br><br>');
@@ -544,7 +544,7 @@ function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
       .replace(/Сегодня йорцайт:/gi, '')
       .trim();
     const items = cleaned
-      .split(/\.\s*(?=Рав\s)/)
+      .split(';')
       .map(s => s.trim())
       .filter(s => s.length > 2);
     yortsaitHTML = items.map(i => `<div class="yortsait-item">${i}</div>`).join('');
@@ -588,7 +588,7 @@ function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
     html += `
       <div class="section shabbat-section">
         <div class="section-label"><span>✡️</span> Шаббат</div>
-        <div class="section-text shabbat-text">${shabbat}</div>
+        <div class="section-text shabbat-text">${withDividers(shabbat)}</div>
       </div>`;
   }
 
@@ -597,7 +597,7 @@ function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
     html += `
       <div class="section community-yortsait">
         <div class="section-label"><span>🕍</span> Йорцайт членов общины</div>
-        <div class="section-text">${communityPhrase}</div>
+        <div class="section-text">${withDividers(communityPhrase)}</div>
       </div>`;
   }
 
@@ -606,7 +606,7 @@ function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
     html += `
       <div class="section">
         <div class="section-label"><span>📖</span> Теилим</div>
-        <div class="section-text tehilim">${tehilim}</div>
+        <div class="section-text tehilim">${withDividers(tehilim)}</div>
       </div>`;
   }
 
@@ -652,7 +652,7 @@ function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
     html += `
       <div class="section">
         <div class="section-label"><span>✨</span> Толкование сновидений</div>
-        <div class="section-text">${additional}</div>
+        <div class="section-text">${withDividers(additional)}</div>
       </div>`;
   }
 
@@ -670,7 +670,7 @@ function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
     html += `
       <div class="section">
         <div class="section-label"><span>💡</span> Мудрость дня</div>
-        <div class="section-text">${wisdom}</div>
+        <div class="section-text">${withDividers(wisdom)}</div>
       </div>`;
   }
 
