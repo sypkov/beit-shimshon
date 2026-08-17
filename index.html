@@ -144,6 +144,28 @@
     line-height: 1.6;
   }
 
+  .text-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 14px 0;
+    color: #c9a84c;
+  }
+  .text-divider::before,
+  .text-divider::after {
+    content: '';
+    flex: 1;
+    max-width: 60px;
+    height: 1px;
+    background: #3a3730;
+  }
+  .text-divider span {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    letter-spacing: 0.15em;
+  }
+
   .shabbat-section { border-left: 2px solid #c9a84c; padding-left: 14px; }
   .shabbat-text { font-size: 14px; font-weight: 300; color: #d4c99a; line-height: 1.75; white-space: pre-wrap; }
 
@@ -187,6 +209,83 @@
     height: 100%;
     border: none;
   }
+
+  .video-note {
+    font-size: 12.5px;
+    font-style: italic;
+    color: #7a7870;
+    margin-bottom: 12px;
+  }
+
+  .section-text.clamped {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .section-text.clamped.expanded {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+  }
+
+  .expand-btn {
+    margin-top: 12px;
+    background: none;
+    border: 1px solid #2a2a30;
+    color: #c9a84c;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .expand-btn:hover { border-color: #c9a84c; }
+
+  .photo-link-section {
+    padding: 20px 36px 4px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .photo-link-btn {
+    display: inline-block;
+    background: none;
+    border: 1px solid #c9a84c;
+    color: #c9a84c;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 22px;
+    border-radius: 3px;
+    font-family: 'Inter', sans-serif;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .photo-link-btn:hover { background: #c9a84c; color: #17171a; }
+
+  @media (max-width: 480px) {
+    .photo-link-section { padding-left: 20px; padding-right: 20px; }
+  }
+
+  .zmanim-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .zmanim-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 13.5px;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .zmanim-label { color: #7a7870; }
+  .zmanim-value { color: #e8e4d8; font-weight: 400; white-space: nowrap; }
 
   .card-footer {
     background: #111113;
@@ -233,17 +332,45 @@
 <script>
 const SPREADSHEET_ID = '1OdL5dt4clO7dwMnTPfArrlmX7TuagNneSY5mKKYfRDo';
 const DATA_TAB = 'data_tab';
+const ZMANIM_TAB = 'zmanim';
+const TANAKH_TAB = 'Tanakh';
 
+// --- data_tab columns ---
 const COL_DATE        = 0;
 const COL_HEBREW_DATE = 1;
 const COL_TEHILIM     = 2;
 const COL_GENERAL     = 3;
 const COL_YORTSAIT    = 4;
-const COL_ADDITIONAL  = 5;
-const COL_SHABBAT     = 10;
+const COL_ADDITIONAL  = 5;  // "Толкование сновидений" (бывшее "Дополнительно")
 const COL_COMMUNITY   = 8;
 const COL_GENDER      = 9;
+const COL_SHABBAT     = 10;
 const COL_YOUTUBE     = 11;
+
+// --- zmanim columns ---
+// ПРЕДПОЛОЖЕНИЕ: дата в листе zmanim находится в колонке A (индекс 0), как в data_tab.
+const ZCOL_DATE            = 0;
+const ZCOL_STARS_OUT       = 2;  // C — Выход звёзд
+const ZCOL_MIDNIGHT        = 3;  // D — Полночь
+const ZCOL_ALOT_HASHACHAR  = 4;  // E — Алот а-Шахар
+const ZCOL_MISHEYAKIR      = 5;  // F — мишеякир (талит и тфилин)
+const ZCOL_SUNRISE         = 6;  // G — Восход солнца
+const ZCOL_SHMA_END        = 7;  // H — Окончание чтения Шма
+const ZCOL_AMIDA_END       = 8;  // I — Окончание чтения Амиды
+const ZCOL_NOON            = 9;  // J — Полдень
+const ZCOL_MINCHA_GDOLA    = 10; // K — Минха Гдола
+const ZCOL_ET_RATZON       = 11; // L — Эт Рацон
+const ZCOL_MINCHA_KTANA    = 12; // M — Минха Ктана
+const ZCOL_MINCHA          = 13; // N — Минха
+const ZCOL_SUNSET          = 15; // P — Заход солнца
+const ZCOL_HALACHIC_HOUR   = 17; // R — Длина дневного алахического часа
+
+// --- Tanakh columns ---
+// ПРЕДПОЛОЖЕНИЕ: дата в листе Tanakh находится в колонке A (индекс 0), как в data_tab.
+const TCOL_DATE   = 0;
+const TCOL_C      = 2; // C — Танах Йоми, выделенная часть
+const TCOL_D      = 3; // D — Танах Йоми, обычный текст
+const TCOL_WISDOM = 4; // E — Мудрость дня
 
 function getTodayStr() {
   const now = new Date();
@@ -273,7 +400,6 @@ function normaliseDate(raw) {
 function formatDateRussian(dateStr) {
   const months = ['января','февраля','марта','апреля','мая','июня',
                   'июля','августа','сентября','октября','ноября','декабря'];
-  // dateStr всегда в формате ДД.ММ.ГГГГ после normaliseDate
   const parts = dateStr.split('.');
   if (parts.length !== 3) return dateStr;
   const d = parseInt(parts[0]);
@@ -283,8 +409,46 @@ function formatDateRussian(dateStr) {
   return `${d} ${months[m]} ${y}`;
 }
 
+function parseDateToObj(ddmmyyyy) {
+  if (!ddmmyyyy) return null;
+  const parts = ddmmyyyy.split('.');
+  if (parts.length !== 3) return null;
+  const d = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10) - 1;
+  const y = parseInt(parts[2], 10);
+  if (isNaN(d) || isNaN(m) || isNaN(y)) return null;
+  return new Date(y, m, d);
+}
+
+// row-элементы теперь объекты {v, f}: v — «сырое» значение (используется для дат/сравнений),
+// f — значение, отформатированное так же, как оно показано в самой таблице (используем для зманим,
+// чтобы время не превращалось в Date(1899,11,30,H,M,S)).
 function cell(row, idx) {
-  return (row[idx] || '').trim();
+  const c = row[idx];
+  return c ? (c.v || '').trim() : '';
+}
+
+function cellF(row, idx) {
+  const c = row[idx];
+  if (!c) return '';
+  return (c.f || c.v || '').trim();
+}
+
+function mapRow(row) {
+  return row.c.map(c => {
+    if (!c) return { v: '', f: '' };
+    const v = (c.v !== null && c.v !== undefined) ? String(c.v) : '';
+    const f = (c.f !== null && c.f !== undefined) ? String(c.f) : '';
+    return { v, f };
+  });
+}
+
+async function fetchSheetRows(sheetName) {
+  const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+  const resp = await fetch(url);
+  const text = await resp.text();
+  const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/)[1]);
+  return json.table.rows;
 }
 
 // Извлекает YouTube video ID из ссылки
@@ -302,7 +466,57 @@ function getYouTubeId(url) {
   return null;
 }
 
-function buildCard(row) {
+// Склеивает колонки C и D листа Tanakh построчно парами: строка из C — выделенная (номер стиха/главы),
+// следующая за ней строка из D — обычным текстом. Так повторяется для каждой пары строк.
+function buildTanakhHTML(cText, dText) {
+  if (!cText && !dText) return '';
+  const cLines = cText ? cText.split(/\n+/).map(s => s.trim()).filter(Boolean) : [];
+  const dLines = dText ? dText.split(/\n+/).map(s => s.trim()).filter(Boolean) : [];
+  const len = Math.max(cLines.length, dLines.length, 1);
+  const pairs = [];
+  for (let i = 0; i < len; i++) {
+    const c = cLines[i] || '';
+    const d = dLines[i] || '';
+    const bits = [];
+    if (c) bits.push(`<strong>${c}</strong>`);
+    if (d) bits.push(d);
+    if (bits.length) pairs.push(bits.join('<br>'));
+  }
+  return pairs.join('<br><br>');
+}
+
+// Заменяет "***" в тексте на красивый декоративный разделитель
+function withDividers(text) {
+  if (!text) return '';
+  const DIVIDER = '<div class="text-divider"><span>✦</span></div>';
+  return text.split('***').map(s => s.trim()).join(DIVIDER);
+}
+
+function buildZmanimHTML(zRow) {
+  if (!zRow) return '';
+  const rows = [
+    ['Выход звёзд', cellF(zRow, ZCOL_STARS_OUT)],
+    ['Полночь', cellF(zRow, ZCOL_MIDNIGHT)],
+    ['Алот а-Шахар (утренняя заря)', cellF(zRow, ZCOL_ALOT_HASHACHAR)],
+    ['Время надевания талита и тфилин (мишеякир)', cellF(zRow, ZCOL_MISHEYAKIR)],
+    ['Восход солнца', cellF(zRow, ZCOL_SUNRISE)],
+    ['Окончание чтения Шма', cellF(zRow, ZCOL_SHMA_END)],
+    ['Окончание чтения Амиды', cellF(zRow, ZCOL_AMIDA_END)],
+    ['Полдень', cellF(zRow, ZCOL_NOON)],
+    ['Минха Гдола', cellF(zRow, ZCOL_MINCHA_GDOLA)],
+    ['Эт Рацон', cellF(zRow, ZCOL_ET_RATZON)],
+    ['Минха Ктана', cellF(zRow, ZCOL_MINCHA_KTANA)],
+    ['Минха', cellF(zRow, ZCOL_MINCHA)],
+    ['Заход солнца', cellF(zRow, ZCOL_SUNSET)],
+    ['Длина дневного алахического часа', cellF(zRow, ZCOL_HALACHIC_HOUR)],
+  ];
+  return rows
+    .filter(([, v]) => v)
+    .map(([label, v]) => `<div class="zmanim-item"><span class="zmanim-label">${label}</span><span class="zmanim-value">${v}</span></div>`)
+    .join('');
+}
+
+function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
   const dateStr    = cell(row, COL_DATE);
   const hebrewDate = cell(row, COL_HEBREW_DATE);
   const tehilim    = cell(row, COL_TEHILIM);
@@ -314,7 +528,7 @@ function buildCard(row) {
   const gender     = cell(row, COL_GENDER).toLowerCase();
   const youtube    = cell(row, COL_YOUTUBE);
 
-  // Йорцайт членов общины
+  // Йорцайт членов общины (сегодня)
   let communityPhrase = '';
   if (community) {
     const soul = (gender === 'ж') ? 'да упокоится душа её в Ган Эдене' : 'да упокоится душа его в Ган Эдене';
@@ -329,14 +543,17 @@ function buildCard(row) {
       .replace(/__Сегодня йорцайт:__/gi, '')
       .replace(/Сегодня йорцайт:/gi, '')
       .trim();
-    // Каждая запись оканчивается годом в скобках вида "(1894 г.)" — режем по этой границе,
-    // а не по каждой точке (иначе рвутся сокращения вроде "сын р." и "5654 г.")
-    let items = cleaned.match(/[\s\S]*?\(\d{4}\s*г\.?\)/g);
-    if (!items || !items.length) {
-      items = [cleaned];
-    }
-    items = items.map(s => s.trim()).filter(s => s.length > 2);
+    const items = cleaned.split('.').map(s => s.trim()).filter(s => s.length > 2);
     yortsaitHTML = items.map(i => `<div class="yortsait-item">${i}</div>`).join('');
+  }
+
+  // Ближайшие йорцайты членов общины (будущие даты)
+  let nearestHTML = '';
+  if (nearestYortsaits && nearestYortsaits.length) {
+    nearestHTML = nearestYortsaits.map(r => {
+      const soul = (r.gender === 'ж') ? 'да упокоится душа её в Ган Эдене' : 'да упокоится душа его в Ган Эдене';
+      return `<div class="yortsait-item">${formatDateRussian(r.dateStr)} — <strong>${r.name}</strong>, ${soul}</div>`;
+    }).join('');
   }
 
   // YouTube embed
@@ -345,6 +562,14 @@ function buildCard(row) {
     <div class="youtube-wrapper">
       <iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
     </div>` : '';
+
+  // Зманим Саратов
+  const zmanimHTML = buildZmanimHTML(zmanimRow);
+
+  // Мудрость дня / Танах Йоми
+  const wisdom  = tanakhRow ? cell(tanakhRow, TCOL_WISDOM) : '';
+  const tanakhC = tanakhRow ? cell(tanakhRow, TCOL_C) : '';
+  const tanakhD = tanakhRow ? cell(tanakhRow, TCOL_D) : '';
 
   let html = `
     <div class="card-header">
@@ -364,21 +589,12 @@ function buildCard(row) {
       </div>`;
   }
 
-  // Йорцайт членов общины
+  // Йорцайт членов общины (сегодня)
   if (communityPhrase) {
     html += `
       <div class="section community-yortsait">
         <div class="section-label"><span>🕍</span> Йорцайт членов общины</div>
         <div class="section-text">${communityPhrase}</div>
-      </div>`;
-  }
-
-  // YouTube
-  if (ytHTML) {
-    html += `
-      <div class="section">
-        <div class="section-label"><span>▶️</span> Видео</div>
-        ${ytHTML}
       </div>`;
   }
 
@@ -396,7 +612,16 @@ function buildCard(row) {
     html += `
       <div class="section">
         <div class="section-label"><span>📜</span> Общее</div>
-        <div class="section-text">${general}</div>
+        <div class="section-text">${withDividers(general)}</div>
+      </div>`;
+  }
+
+  // Ближайшие йорцайты членов общины (перед Йорцайт праведников)
+  if (nearestHTML) {
+    html += `
+      <div class="section">
+        <div class="section-label"><span>🕯</span> Ближайшие йорцайты членов общины</div>
+        <div class="yortsait-list">${nearestHTML}</div>
       </div>`;
   }
 
@@ -409,16 +634,58 @@ function buildCard(row) {
       </div>`;
   }
 
-  // Дополнительно
+  // Видео (между Йорцайт праведников и Толкование сновидений)
+  if (ytHTML) {
+    html += `
+      <div class="section">
+        <div class="section-label"><span>▶️</span> Видео</div>
+        <div class="video-note">Видео доступно к просмотру при включенном VPN</div>
+        ${ytHTML}
+      </div>`;
+  }
+
+  // Толкование сновидений (бывшее "Дополнительно")
   if (additional) {
     html += `
       <div class="section">
-        <div class="section-label"><span>✨</span> Дополнительно</div>
+        <div class="section-label"><span>✨</span> Толкование сновидений</div>
         <div class="section-text">${additional}</div>
       </div>`;
   }
 
+  // Зманим Саратов
+  if (zmanimHTML) {
+    html += `
+      <div class="section">
+        <div class="section-label"><span>⏳</span> Зманим Саратов</div>
+        <div class="zmanim-list">${zmanimHTML}</div>
+      </div>`;
+  }
+
+  // Мудрость дня
+  if (wisdom) {
+    html += `
+      <div class="section">
+        <div class="section-label"><span>💡</span> Мудрость дня</div>
+        <div class="section-text">${wisdom}</div>
+      </div>`;
+  }
+
+  // Ежедневное изучение ТаНаХа — Танах Йоми
+  if (tanakhC || tanakhD) {
+    const tanakhBody = buildTanakhHTML(tanakhC, tanakhD);
+    html += `
+      <div class="section">
+        <div class="section-label"><span>📚</span> Ежедневное изучение ТаНаХа — Танах Йоми</div>
+        <div class="section-text clamped" id="tanakh-content">${tanakhBody}</div>
+        <button class="expand-btn" id="tanakh-toggle" onclick="toggleTanakh()">Развернуть</button>
+      </div>`;
+  }
+
   html += `
+    </div>
+    <div class="photo-link-section">
+      <a class="photo-link-btn" href="photos.html">Фото нашей общины</a>
     </div>
     <div class="card-footer">
       <span class="footer-text">Теилим, сгулот и йорцайты</span>
@@ -429,23 +696,29 @@ function buildCard(row) {
   return html;
 }
 
+function toggleTanakh() {
+  const el = document.getElementById('tanakh-content');
+  const btn = document.getElementById('tanakh-toggle');
+  if (!el || !btn) return;
+  const expanded = el.classList.toggle('expanded');
+  btn.textContent = expanded ? 'Свернуть' : 'Развернуть';
+}
+
 async function loadData() {
   const card = document.getElementById('card');
   const today = getTodayStr();
+  const todayObj = parseDateToObj(today);
 
   try {
-    const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(DATA_TAB)}`;
-    const resp = await fetch(url);
-    const text = await resp.text();
-    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/)[1]);
-    const rows = json.table.rows;
+    const dataRows = await fetchSheetRows(DATA_TAB);
 
     let found = null;
-    for (const row of rows) {
-      const cells = row.c.map(c => c ? (c.v !== null && c.v !== undefined ? String(c.v) : '') : '');
-      if (normaliseDate(cells[COL_DATE].trim()) === today) {
+    const allCells = [];
+    for (const row of dataRows) {
+      const cells = mapRow(row);
+      allCells.push(cells);
+      if (normaliseDate(cell(cells, COL_DATE)) === today) {
         found = cells;
-        break;
       }
     }
 
@@ -454,7 +727,60 @@ async function loadData() {
       return;
     }
 
-    card.innerHTML = buildCard(found);
+    // Ближайшие в будущем йорцайты членов общины (из колонки I)
+    const nearest = allCells
+      .map(cells => {
+        const dateStr = normaliseDate(cell(cells, COL_DATE));
+        return {
+          dateStr,
+          name: cell(cells, COL_COMMUNITY),
+          gender: cell(cells, COL_GENDER).toLowerCase(),
+          dateObj: parseDateToObj(dateStr)
+        };
+      })
+      .filter(r => r.name && r.dateObj && todayObj && r.dateObj > todayObj)
+      .sort((a, b) => a.dateObj - b.dateObj)
+      .slice(0, 3);
+
+    // Зманим на сегодня
+    let zmanimRow = null;
+    try {
+      const zRows = await fetchSheetRows(ZMANIM_TAB);
+      for (const row of zRows) {
+        const cells = mapRow(row);
+        if (normaliseDate(cell(cells, ZCOL_DATE)) === today) {
+          zmanimRow = cells;
+          break;
+        }
+      }
+    } catch (e) {
+      // Лист zmanim необязателен — при ошибке просто не показываем раздел
+    }
+
+    // Мудрость дня / Танах Йоми на сегодня
+    let tanakhRow = null;
+    try {
+      const tRows = await fetchSheetRows(TANAKH_TAB);
+      for (const row of tRows) {
+        const cells = mapRow(row);
+        if (normaliseDate(cell(cells, TCOL_DATE)) === today) {
+          tanakhRow = cells;
+          break;
+        }
+      }
+    } catch (e) {
+      // Лист Tanakh необязателен — при ошибке просто не показываем разделы
+    }
+
+    card.innerHTML = buildCard(found, nearest, zmanimRow, tanakhRow);
+
+    requestAnimationFrame(() => {
+      const el = document.getElementById('tanakh-content');
+      const btn = document.getElementById('tanakh-toggle');
+      if (el && btn && el.scrollHeight <= el.clientHeight + 2) {
+        btn.style.display = 'none';
+      }
+    });
 
   } catch (e) {
     card.innerHTML = `<div class="error">Ошибка загрузки данных: ${e.message}</div>`;
