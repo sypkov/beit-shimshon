@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Община «Бейт Шимшон» (г. Саратов)</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon.png">
@@ -29,7 +29,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 32px 16px calc(32px + env(safe-area-inset-bottom, 0px));
+    padding: 32px 16px;
     min-height: 100vh;
   }
 
@@ -55,12 +55,6 @@
     overflow: hidden;
     box-shadow: 0 24px 64px rgba(0,0,0,0.6);
   }
-
-  @keyframes card-in {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .card.loaded { animation: card-in 0.45s ease; }
 
   .card-header {
     padding: 32px 36px 28px;
@@ -97,7 +91,7 @@
     font-family: 'Cormorant Garamond', serif;
     font-size: 16px;
     font-style: italic;
-    color: #8c8a80;
+    color: #7a7870;
     margin-top: 8px;
   }
 
@@ -115,14 +109,12 @@
     padding-bottom: 0;
   }
 
-  .section.section-loose { padding-bottom: 30px; }
-
   .section-label {
-    font-size: 10.5px;
+    font-size: 10px;
     font-weight: 500;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: #a1813f;
+    color: #7a6330;
     margin-bottom: 10px;
     display: flex;
     align-items: center;
@@ -152,8 +144,6 @@
     line-height: 1.6;
   }
 
-  .section-text.wisdom { line-height: 1.85; }
-
   .text-divider {
     display: flex;
     align-items: center;
@@ -179,13 +169,13 @@
   .shabbat-section { border-left: 2px solid #c9a84c; padding-left: 14px; }
   .shabbat-text { font-size: 14px; font-weight: 300; color: #d4c99a; line-height: 1.75; white-space: pre-wrap; }
 
-  .yortsait-list { display: flex; flex-direction: column; gap: 8px; }
+  .yortsait-list { display: flex; flex-direction: column; gap: 6px; }
 
   .yortsait-item {
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 300;
     color: #e8e4d8;
-    line-height: 1.7;
+    line-height: 1.6;
     padding-left: 14px;
     position: relative;
   }
@@ -197,24 +187,13 @@
     color: #7a6330;
   }
 
-  .yortsait-item.upcoming {
-    display: flex;
-    gap: 10px;
-  }
-  .yortsait-item.upcoming .yortsait-date {
-    flex: 0 0 92px;
-    color: #c9a84c;
-    font-size: 12px;
-    letter-spacing: 0.02em;
-  }
-  .yortsait-item.upcoming .yortsait-text { flex: 1; }
-
   .community-yortsait .section-text {
     color: #c9a84c;
     font-size: 15px;
   }
 
   .community-yortsait .section-text strong { font-weight: 500; }
+  .community-line { margin-top: 4px; }
 
   .youtube-wrapper {
     position: relative;
@@ -233,15 +212,23 @@
   }
 
   .video-note {
-    font-size: 11px;
+    font-size: 12.5px;
     font-style: italic;
-    color: #5f5d54;
+    color: #7a7870;
     margin-bottom: 12px;
   }
 
   .section-text.clamped {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    transition: max-height 0.35s ease;
+  }
+
+  .section-text.clamped.expanded {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
   }
 
   .expand-btn {
@@ -261,26 +248,20 @@
   .expand-btn:hover { border-color: #c9a84c; }
 
   .photo-link-section {
-    padding: 22px 36px 26px;
-    border-top: 1px solid #222228;
+    padding: 20px 36px 4px;
     display: flex;
     justify-content: center;
   }
 
   .photo-link-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    max-width: 320px;
-    background: rgba(201,168,76,0.07);
+    display: inline-block;
+    background: none;
     border: 1px solid #c9a84c;
     color: #c9a84c;
     font-size: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    padding: 12px 22px;
+    padding: 10px 22px;
     border-radius: 3px;
     font-family: 'Inter', sans-serif;
     text-decoration: none;
@@ -293,37 +274,19 @@
     .photo-link-section { padding-left: 20px; padding-right: 20px; }
   }
 
-  .zmanim-list {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2px;
-  }
-  @media (min-width: 400px) {
-    .zmanim-list { grid-template-columns: 1fr 1fr; column-gap: 22px; }
-  }
+  .zmanim-list { display: flex; flex-direction: column; gap: 6px; }
 
   .zmanim-item {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    gap: 12px;
-    font-size: 12.5px;
+    gap: 16px;
+    font-size: 13.5px;
     font-weight: 300;
-    line-height: 1.75;
-    padding: 4px 6px;
-    border-radius: 2px;
+    line-height: 1.6;
   }
-  .zmanim-item:nth-child(odd) { background: rgba(201,168,76,0.04); }
 
-  .zmanim-label { color: #8c8a80; }
-  .zmanim-value {
-    color: #e8e4d8;
-    font-weight: 400;
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-    min-width: 58px;
-    text-align: right;
-  }
+  .zmanim-label { color: #7a7870; }
+  .zmanim-value { color: #e8e4d8; font-weight: 400; white-space: nowrap; }
 
   .card-footer {
     background: #111113;
@@ -334,25 +297,15 @@
     justify-content: space-between;
   }
 
-  .footer-text { font-size: 11px; color: #8c8a80; letter-spacing: 0.04em; }
+  .footer-text { font-size: 11px; color: #7a7870; letter-spacing: 0.04em; }
   .candle { font-size: 16px; opacity: 0.6; }
 
-  .skeleton { padding: 32px 36px; }
-  .skeleton-line {
-    background: linear-gradient(90deg, #1c1c20 25%, #24242a 37%, #1c1c20 63%);
-    background-size: 400% 100%;
-    animation: skeleton-shimmer 1.4s ease infinite;
-    border-radius: 3px;
-    margin-bottom: 14px;
+  .loading {
+    color: #7a7870;
+    font-size: 14px;
+    text-align: center;
+    padding: 40px;
   }
-  @keyframes skeleton-shimmer {
-    0% { background-position: 100% 50%; }
-    100% { background-position: 0 50%; }
-  }
-  .skeleton-line.title { height: 32px; width: 55%; }
-  .skeleton-line.subtitle { height: 13px; width: 38%; margin-bottom: 30px; }
-  .skeleton-line.text { height: 12px; }
-  .skeleton-line.text.short { width: 65%; margin-bottom: 0; }
 
   .error {
     color: #c0392b;
@@ -374,13 +327,7 @@
 <div class="page-title">Уважаемые друзья, члены общины «Бейт Шимшон»!</div>
 
 <div class="card" id="card">
-  <div class="skeleton">
-    <div class="skeleton-line title"></div>
-    <div class="skeleton-line subtitle"></div>
-    <div class="skeleton-line text"></div>
-    <div class="skeleton-line text"></div>
-    <div class="skeleton-line text short"></div>
-  </div>
+  <div class="loading">Загрузка данных...</div>
 </div>
 
 <script>
@@ -570,6 +517,19 @@ function buildZmanimHTML(zRow) {
     .join('');
 }
 
+// Разбивает значение колонки I по ";" и формирует отдельную строку на каждого с фразой об упокоении души.
+// Пол берётся из колонки J: если там столько же частей через ";", что и имён — по каждому отдельно,
+// иначе одно значение применяется ко всем.
+function communityLinesHTML(names, genderRaw) {
+  const nameParts = (names || '').split(';').map(s => s.trim()).filter(Boolean);
+  const genderParts = (genderRaw || '').split(';').map(s => s.trim().toLowerCase());
+  return nameParts.map((name, i) => {
+    const g = (genderParts.length === nameParts.length ? genderParts[i] : genderParts[0]) || '';
+    const soul = (g === 'ж') ? 'да упокоится душа её в Ган Эдене' : 'да упокоится душа его в Ган Эдене';
+    return `<div class="community-line"><strong>${name}</strong>, ${soul}</div>`;
+  }).join('');
+}
+
 function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
   const dateStr    = cell(row, COL_DATE);
   const hebrewDate = cell(row, COL_HEBREW_DATE);
@@ -585,8 +545,7 @@ function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
   // Йорцайт членов общины (сегодня)
   let communityPhrase = '';
   if (community) {
-    const soul = (gender === 'ж') ? 'да упокоится душа её в Ган Эдене' : 'да упокоится душа его в Ган Эдене';
-    communityPhrase = `Сегодня йорцайт у членов нашей общины: <strong>${community}</strong>, ${soul}`;
+    communityPhrase = `<div>Сегодня йорцайт у членов нашей общины:</div>${communityLinesHTML(community, gender)}`;
   }
 
   // Йорцайт праведников
@@ -608,8 +567,13 @@ function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
   let nearestHTML = '';
   if (nearestYortsaits && nearestYortsaits.length) {
     nearestHTML = nearestYortsaits.map(r => {
-      const soul = (r.gender === 'ж') ? 'да упокоится душа её в Ган Эдене' : 'да упокоится душа его в Ган Эдене';
-      return `<div class="yortsait-item upcoming"><span class="yortsait-date">${formatDateRussian(r.dateStr)}</span><span class="yortsait-text"><strong>${r.name}</strong>, ${soul}</span></div>`;
+      const nameParts = r.name.split(';').map(x => x.trim()).filter(Boolean);
+      const genderParts = (r.gender || '').split(';').map(x => x.trim().toLowerCase());
+      return nameParts.map((name, i) => {
+        const g = (genderParts.length === nameParts.length ? genderParts[i] : genderParts[0]) || '';
+        const soul = (g === 'ж') ? 'да упокоится душа её в Ган Эдене' : 'да упокоится душа его в Ган Эдене';
+        return `<div class="yortsait-item">${formatDateRussian(r.dateStr)} — <strong>${name}</strong>, ${soul}</div>`;
+      }).join('');
     }).join('');
   }
 
@@ -704,7 +668,7 @@ function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
   // Толкование сновидений (бывшее "Дополнительно")
   if (additional) {
     html += `
-      <div class="section section-loose">
+      <div class="section">
         <div class="section-label"><span>✨</span> Толкование сновидений</div>
         <div class="section-text">${withDividers(additional)}</div>
       </div>`;
@@ -713,7 +677,7 @@ function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
   // Зманим Саратов
   if (zmanimHTML) {
     html += `
-      <div class="section section-loose">
+      <div class="section">
         <div class="section-label"><span>⏳</span> Зманим Саратов</div>
         <div class="zmanim-list">${zmanimHTML}</div>
       </div>`;
@@ -724,7 +688,7 @@ function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
     html += `
       <div class="section">
         <div class="section-label"><span>💡</span> Мудрость дня</div>
-        <div class="section-text wisdom">${withDividers(wisdom)}</div>
+        <div class="section-text">${withDividers(wisdom)}</div>
       </div>`;
   }
 
@@ -732,7 +696,7 @@ function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
   if (tanakhC || tanakhD) {
     const tanakhBody = buildTanakhHTML(tanakhC, tanakhD);
     html += `
-      <div class="section section-loose">
+      <div class="section">
         <div class="section-label"><span>📚</span> Ежедневное изучение ТаНаХа — Танах Йоми</div>
         <div class="section-text clamped" id="tanakh-content">${tanakhBody}</div>
         <button class="expand-btn" id="tanakh-toggle" onclick="toggleTanakh()">Развернуть</button>
@@ -742,7 +706,7 @@ function buildCard(row, nearestYortsaits, zmanimRow, tanakhRow) {
   html += `
     </div>
     <div class="photo-link-section">
-      <a class="photo-link-btn" href="photos.html"><span>📷</span> Фото нашей общины</a>
+      <a class="photo-link-btn" href="photos.html">Фото нашей общины</a>
     </div>
     <div class="card-footer">
       <span class="footer-text">Теилим, сгулот и йорцайты</span>
@@ -758,11 +722,6 @@ function toggleTanakh() {
   const btn = document.getElementById('tanakh-toggle');
   if (!el || !btn) return;
   const expanded = el.classList.toggle('expanded');
-  if (expanded) {
-    el.style.maxHeight = el.scrollHeight + 'px';
-  } else {
-    el.style.maxHeight = el.dataset.collapsedHeight || '';
-  }
   btn.textContent = expanded ? 'Свернуть' : 'Развернуть';
 }
 
@@ -835,19 +794,12 @@ async function loadData() {
     }
 
     card.innerHTML = buildCard(found, nearest, zmanimRow, tanakhRow);
-    card.classList.add('loaded');
 
     requestAnimationFrame(() => {
       const el = document.getElementById('tanakh-content');
       const btn = document.getElementById('tanakh-toggle');
-      if (el && btn) {
-        const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 25;
-        const collapsedHeight = Math.round(lineHeight * 3);
-        el.dataset.collapsedHeight = collapsedHeight + 'px';
-        el.style.maxHeight = collapsedHeight + 'px';
-        if (el.scrollHeight <= collapsedHeight + 2) {
-          btn.style.display = 'none';
-        }
+      if (el && btn && el.scrollHeight <= el.clientHeight + 2) {
+        btn.style.display = 'none';
       }
     });
 
